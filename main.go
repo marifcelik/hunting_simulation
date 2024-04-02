@@ -3,13 +3,13 @@ package main
 import (
 	"fmt"
 	"math/rand"
+	"slices"
 )
 
 const AREA_SIZE = 500
 
 var (
-	area  *Area
-	total int
+	area *Area
 
 	huntersHuntedPreds = make(map[PredatorType]int)
 	huntersHuntedPreys = make(map[PreyType]int)
@@ -24,29 +24,30 @@ type Area struct {
 	hunter    *Hunter
 	action    int
 	matrix    [][]IMover
+	count     int
 }
 
 func NewArea(hunter *Hunter, predators []*Predator, preys []*Prey) *Area {
-	area := new(Area)
-	area.hunter = hunter
-	area.predators = predators
-	area.preys = preys
+	newArea := new(Area)
+	newArea.hunter = hunter
+	newArea.predators = predators
+	newArea.preys = preys
 
 	matrix := make([][]IMover, AREA_SIZE)
 	for i := range matrix {
 		matrix[i] = make([]IMover, AREA_SIZE)
 	}
-	area.matrix = matrix
+	newArea.matrix = matrix
 
-	area.add(hunter)
+	newArea.add(hunter)
 	for _, p := range predators {
-		area.add(p)
+		newArea.add(p)
 	}
 	for _, p := range preys {
-		area.add(p)
+		newArea.add(p)
 	}
 
-	return area
+	return newArea
 }
 
 func (a *Area) add(i IMover) {
@@ -56,6 +57,19 @@ func (a *Area) add(i IMover) {
 		i.SetY(rand.Intn(AREA_SIZE))
 	}
 	a.matrix[AREA_SIZE-i.Y()-1][i.X()] = i
+}
+
+func (a *Area) calculateTotal() int {
+	count := 0
+	for y := range AREA_SIZE {
+		for x := range AREA_SIZE {
+			if a.At(x, y) != nil {
+				count++
+			}
+		}
+	}
+	a.count = count
+	return count
 }
 
 func (a *Area) At(x, y int) IMover {
@@ -75,27 +89,21 @@ func (a *Area) AddAnimal(animal IAnimal) {
 }
 
 func (a *Area) Print() {
-	for y := range AREA_SIZE {
-		for x := range AREA_SIZE {
-			if a.At(x, y) != nil {
-				total++
-			}
-		}
-	}
-	fmt.Printf("\ntotal number of living things in the area: %v\n", total)
+	a.calculateTotal()
+	fmt.Printf("\ntotal number of living things in the area: %v\n", a.count)
 
-	print("hunters hunts", huntersHuntedPreys)
+	printMap("hunters hunts", huntersHuntedPreys)
 	for k, v := range huntersHuntedPreds {
 		fmt.Printf("\t%v: %v, ", k, v)
 	}
 	fmt.Printf("\n")
 
-	print("predators hunts", predatorsHunted)
-	print("predators breed", predatorsBreeded)
-	print("preys breed", preysBreeded)
+	printMap("predators hunts", predatorsHunted)
+	printMap("predators breed", predatorsBreeded)
+	printMap("preys breed", preysBreeded)
 }
 
-func print[T comparable](str string, iterate map[T]int) {
+func printMap[T comparable](str string, iterate map[T]int) {
 	fmt.Printf("%s : \n", str)
 	if len(iterate) == 0 {
 		fmt.Printf("\tnothing\n")
@@ -111,18 +119,6 @@ func (a *Area) Delete(x, y int) {
 	a.matrix[AREA_SIZE-y-1][x] = nil
 }
 
-// for some reasen hunt method doesn't delete the hunted animal when first call
-// FIX IT
-func Hunt[T IHunter](hunters ...T) {
-	for _, hunter := range hunters {
-		hunt, hunted := hunter.Hunt()
-		if hunted {
-			// fmt.Printf("Deleting %v,%v\n", hunt.X(), hunt.Y())
-			area.Delete(hunt.X(), hunt.Y())
-		}
-	}
-}
-
 func Move[T IMover](movers ...T) {
 	for _, m := range movers {
 		if area.action >= 1000 {
@@ -130,11 +126,32 @@ func Move[T IMover](movers ...T) {
 		}
 		oldX, oldY := m.X(), m.Y()
 		m.Move()
-		newX, newY := m.X(), m.Y()
-		area.action += m.Unit()
-
 		area.Delete(oldX, oldY)
-		area.matrix[AREA_SIZE-newY-1][newX] = m
+		area.add(m)
+
+		area.action += m.Unit()
+	}
+}
+
+func Hunt[T IHunter](hunters ...T) {
+	for _, hunter := range hunters {
+		hunt, hunted := hunter.Hunt()
+		if hunted {
+			area.Delete(hunt.X(), hunt.Y())
+
+			switch hunt := hunt.(type) {
+			case *Predator:
+				area.predators = slices.DeleteFunc(area.predators, func(a *Predator) bool {
+					return a.x == hunt.X() && a.y == hunt.Y()
+				})
+			case *Prey:
+				area.preys = slices.DeleteFunc(area.preys, func(a *Prey) bool {
+					return a.x == hunt.X() && a.y == hunt.Y()
+				})
+			default:
+				panic("Unknown animal")
+			}
+		}
 	}
 }
 
