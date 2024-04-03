@@ -16,11 +16,5 @@ type IAnimal interface {
 }
 
 type IHunter interface {
-	IMover
 	Hunt() (IAnimal, bool)
-}
-
-type IPredator interface {
-	IHunter
-	IAnimal
 }
