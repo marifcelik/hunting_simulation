@@ -52,7 +52,7 @@ Taranan alan içerisinde, kendisi ile aynı tür ve farklı cinsiyetteki hayvanl
 
 ### Eksikler
 - [ ] `Hunt` methodu sonrası `area.matrix` üzerinde silme işlemi düzeltilmeli.
-- [ ] `Predator` ve `Prey` yapılarında `Breed` methodu, `Hunter` ve `Predator` yapılarında ise  `Hunt` methodu içerisinde tarama işlemi için tekrar eden kod blokları bulunuyor. Bu tarama işlemi için daha generic bir fonksiyon yazılmalı.
+- [x] `Predator` ve `Prey` yapılarında `Breed` methodu, `Hunter` ve `Predator` yapılarında ise  `Hunt` methodu içerisinde tarama işlemi için tekrar eden kod blokları bulunuyor. Bu tarama işlemi için daha generic bir fonksiyon yazılmalı.
 - [ ] `Breed` methodu, eşleştiği hayvan daha önce üreme yapmış olsa bile üreme yapabiliyor. Bu durum düzeltilmeli.
 - [ ] Logging sistemi kurulmalı
 
