@@ -18,31 +18,10 @@ func NewHunter(unit int) *Hunter {
 //
 // if there is no prey found it returns nil
 func (h *Hunter) Hunt() (hunt IAnimal, hunted bool) {
-	foundAnimals := make([]IAnimal, 0)
-
-	for xr, xl, a := h.x-h.unitRange, h.x+h.unitRange, 0; xr <= xl; xr, xl, a = xr+1, xl-1, a+1 {
-		for y := h.y + a; y >= h.y-a; y-- {
-			if y == h.y {
-				continue
-			}
-
-			if xr < 0 || xl < 0 || y < 0 || xr >= AREA_SIZE || xl >= AREA_SIZE || y >= AREA_SIZE {
-				continue
-			}
-
-			look := func(a IMover) {
-				if a != nil {
-					a := a.(IAnimal)
-					foundAnimals = append(foundAnimals, a)
-				}
-			}
-
-			animalLeft := area.At(xl, y)
-			animalRight := area.At(xr, y)
-			look(animalLeft)
-			look(animalRight)
-		}
-	}
+	foundAnimals := Scan(h.x, h.y, h.unitRange, func(m IMover) (IAnimal, bool) {
+		v, ok := m.(IAnimal)
+		return v, ok
+	})
 
 	slices.SortFunc(foundAnimals, func(a, b IAnimal) int {
 		return int(

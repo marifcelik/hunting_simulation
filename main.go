@@ -89,8 +89,7 @@ func (a *Area) AddAnimal(animal IAnimal) {
 }
 
 func (a *Area) Print() {
-	a.calculateTotal()
-	fmt.Printf("\ntotal number of living things in the area: %v\n", a.count)
+	fmt.Printf("\ntotal number of living things in the area: %v\n", a.calculateTotal())
 
 	printMap("hunters hunts", huntersHuntedPreys)
 	for k, v := range huntersHuntedPreds {
@@ -149,7 +148,7 @@ func Hunt[T IHunter](hunters ...T) {
 					return a.x == hunt.X() && a.y == hunt.Y()
 				})
 			default:
-				panic("Unknown animal")
+				panic("Unknown hunt")
 			}
 		}
 	}
@@ -162,6 +161,30 @@ func Breed[T IAnimal](breeders ...T) {
 			area.AddAnimal(breed)
 		}
 	}
+}
+
+func Scan[T IMover](px, py, gap int, fn func(m IMover) (T, bool)) []T {
+	found := make([]T, 0)
+
+	for xr, xl, a := px-gap, px+gap, 0; xr <= xl; xr, xl, a = xr+1, xl-1, a+1 {
+		for y := py + a; y >= py-a; y-- {
+			if xr < 0 || xl < 0 || y < 0 || xr >= AREA_SIZE || xl >= AREA_SIZE || y >= AREA_SIZE {
+				continue
+			}
+
+			aleft := area.At(xl, y)
+			aright := area.At(xl, y)
+
+			if v, ok := fn(aleft); ok {
+				found = append(found, v)
+			}
+			if v, ok := fn(aright); ok {
+				found = append(found, v)
+			}
+		}
+	}
+
+	return found
 }
 
 func init() {
