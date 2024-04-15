@@ -32,9 +32,6 @@ Aynı cins hayvanların 3 birim yakınına gelindiğinde üreme gerçekleşir. `
 
 Ardından `Hunt` fonksiyonu çağrılır. Bu fonksiyon `IHunter` interface'ini implemente eden canlılar için çağrılır. `Hunt` methodlarında canlının avlayabileceği mesafe içerisindeki canlılar taranır. Eğer avlanma gerçekleşirse avlanan canlı `area.matrix` üzerinden silinir.
 
-> [!CAUTION]
-> `Hunt` methodu sonrası `area.matrix` üzerinde silme işlemlerinde sebebini anlayamadığım bir sorun var, uygulamanın ana mantığı üzerinde yoğunlaştığım için sorunu henüz çözemedim. Ama ilgileniyorum 🫠
-
 ## Tarama işlemi
 
 |  |  |
@@ -51,7 +48,7 @@ Taranan alan içerisinde, kendisi ile aynı tür ve farklı cinsiyetteki hayvanl
 
 
 ### Eksikler
-- [ ] `Hunt` methodu sonrası `area.matrix` üzerinde silme işlemi düzeltilmeli.
+- [x] `Hunt` methodu sonrası `area.matrix` üzerinde silme işlemi düzeltilmeli.
 - [x] `Predator` ve `Prey` yapılarında `Breed` methodu, `Hunter` ve `Predator` yapılarında ise  `Hunt` methodu içerisinde tarama işlemi için tekrar eden kod blokları bulunuyor. Bu tarama işlemi için daha generic bir fonksiyon yazılmalı.
 - [ ] `Breed` methodu, eşleştiği hayvan daha önce üreme yapmış olsa bile üreme yapabiliyor. Bu durum düzeltilmeli.
 - [ ] Logging sistemi kurulmalı
